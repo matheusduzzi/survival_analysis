@@ -1,0 +1,62 @@
+---
+title: "Game of Thrones Surv An."
+author: "Matheus Duzzi Ribeiro"
+date: "09/12/2020"
+output: html_document
+---
+
+
+```{r}
+library(readr)
+character_deaths <- read_csv("character-deaths.csv")
+```
+
+```{r}
+library(dplyr)
+library(magrittr)
+
+# contagem de mortos por sexo e familia
+character_deaths %<>% select(Name,Allegiances,`Death Year`, Gender) %>% mutate(`Death Year` = ifelse(is.na(`Death Year`) == TRUE,0,`Death Year`)) %>% group_by(`Death Year`,Allegiances,Gender) %>% count() %>% ungroup()
+
+# manipulação de sobreviventes
+survivals = character_deaths %>% filter(`Death Year` == 0) 
+survivals %<>% mutate(status = c(0),`Death Year` = 297) %>% ungroup()
+survivals = rbind(survivals, survivals %>% mutate(`Death Year` = 298)) %>% rbind(survivals %>% mutate(`Death Year` = 299)) %>% rbind(survivals %>% mutate(`Death Year` = 300)) %>% ungroup()
+
+# manipulação de sobreviventes
+character_deaths %<>% filter(`Death Year` != 0) %>% ungroup() 
+character_deaths %<>% mutate(status = c(1)) %>% ungroup()
+
+# junção das tabelas
+character_deaths %<>% rbind(survivals) %>% ungroup()
+```
+
+```{r}
+# expanção das mortes
+character_deaths = character_deaths[rep(row.names(character_deaths), character_deaths$n), 1:5] %>% select(-n) %>% ungroup()
+
+# ano por ordem
+character_deaths %<>% mutate(`Death Year` = ifelse(`Death Year` == 297,1,`Death Year`), `Death Year` = ifelse(`Death Year` == 298,2,`Death Year`), `Death Year` = ifelse(`Death Year` == 299,3,`Death Year`), `Death Year` = ifelse(`Death Year` == 300,4,`Death Year`))
+```
+
+```{r}
+library(survival) # Analise de sobrevivencia
+library(survminer) # graficos estilizados
+
+ggsurvplot(fit = survfit(Surv(`Death Year`, status) ~ Gender, data=character_deaths), 
+    xlab = "Anos", 
+    ylab = "Probabilidade geral de sobrevivência",font.x = c(10, "black"),
+    font.y = c(10, "black"))
+```
+
+```{r}
+ggsurvplot(fit = survfit(Surv(`Death Year`, status) ~ Allegiances, data=character_deaths), 
+    xlab = "Anos", 
+    ylab = "Probabilidade geral de sobrevivência",font.x = c(10, "black"),
+    font.y = c(10, "black"))
+```
+
+```{r}
+survdiff(Surv(`Death Year`, status) ~ Allegiances, data=character_deaths,rho=0)
+```
+
