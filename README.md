@@ -4,4 +4,9 @@ Material de apoio usado na aula de introdução a ciência de dados - análise d
 
 Nesse workshop introduzi um pouco da teoria estastística envolvida, quando realizar essa abordagem e os motivos de aderir uma análise como essa.
 
+- Caso você tenha interesse em saber sobre a teoria, recomendo dar uma olhada na apresentação em ppt.
+- Por outro lado, se quiser ver como codificar uma análise de sobrevivência em um caso prático, deixei um case em Rmd usando um banco de dados do Game of Thrones.
+
+
+
 
